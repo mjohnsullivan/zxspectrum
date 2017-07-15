@@ -1,0 +1,6 @@
+# Spectrum compile outputs
+*.tap
+*_out*
+
+# z88dk files
+zcc_opt.def
