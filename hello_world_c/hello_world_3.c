@@ -16,8 +16,8 @@
 #define clearScreen()           printf("\x0C")
 #define setInkColour(colour)    printf("\x10%c", (colour))
 #define setPaperColour(colour)  printf("\x11%c", (colour))
-#define setFlashOn()            printf("\x121")
-#define setFlashOff()           printf("\x120")
+#define setFlashOn()            printf("\x12\x01")
+#define setFlashOff()           printf("\x12\x00")
 #define setPosition(x, y)       printf("\x16%c%c", (x) + 0x20, (y) + 0x20)
 
 main()
