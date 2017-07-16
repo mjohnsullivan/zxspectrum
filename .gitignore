@@ -4,3 +4,6 @@
 
 # z88dk files
 zcc_opt.def
+
+# Mac
+.DS_Store

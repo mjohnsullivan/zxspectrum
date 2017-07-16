@@ -21,7 +21,6 @@ main()
       defb $11, $04 ; paper colour
       defb "Hello world"
     string_eof:
-      defb $00
 
   #endasm
 }
