@@ -1,5 +1,4 @@
-; WIP - not completed yet
-; Will eventually scroll hello world across and down the screen
+; Scrolls repeating hello world strings across the screen
 
 ; to compile with z88dk to a tap file, use
 ; z80asm +zx hello_world_3.asm
@@ -34,23 +33,31 @@ loopy:                  ; loop horizontally
     call printstr
     call shortpause
     ; clear the first character (to clean up after earlier prints)
-    call setxy
+    ; but don't clear if at the end of the line
+    ld hl, ypos
+    ld a, (hl)
+    cp 32-eostr+string  ; compare to 32 (width of the screen - string length)
+    jr z, noerase       ; don't erase if zero
+    call setxy          ; set the print position
     ld a, 32            ; code for SPACE
     rst 16              ; print
+noerase:
     ; increment ypos
     ld hl, ypos         ; load ypos addr
     inc (hl)            ; increment ypos
     ld a, (hl)          ; load ypos value into a
-    cp 33-eostr+string  ; compare to 32 (width of the screen - string length)
+    cp 33-eostr+string  ; compare 33 (width of the screen + 1 - string length)
     jr nz, loopy        ; not equal? loop
     ; reached the end of the screen
     ld (hl), 0          ; reset ypos
     ; increment xpos
     ld hl, xpos         ; load xpos addr
     inc (hl)            ; increment xpos
-    ld a, (hl)          ; load xpo value into a
+    ld a, (hl)          ; load xpos value into a
     cp 22               ; compare to the chat height of the screen
     jr nz, loopx
+
+    call longpause
 
 ; program complete
     ret
@@ -63,7 +70,7 @@ loopy:                  ; loop horizontally
 ; short pause
 ;
 shortpause:
-    ld b, 1             ; time to pause (1/10 sec)
+    ld b, 1             ; time to pause (1/50 sec)
 shortpauseloop:
     halt                ; wait for interrupt
     djnz shortpauseloop ; repeat if b not 0
@@ -87,6 +94,7 @@ printstr:
     ld bc, eostr-string ; length of string to print
     call 8252           ; print the string
     ret
+
 ;
 ; set the x and y position for text writing
 ;
