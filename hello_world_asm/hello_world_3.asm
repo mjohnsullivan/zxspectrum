@@ -23,21 +23,91 @@
     ld a, 2             ; red (2)
     out (254), a        ; write to port 254 - least significant bytes set color
 
+; set the channel
     ld a, 2             ; upper screen (use 1 for lower)
     call 5633           ; open channel
 
+; repeatedly print the string
+loopx:                  ; loop vertically
+loopy:                  ; loop horizontally
+    call setxy
+    call printstr
+    call shortpause
+    ; clear the first character (to clean up after earlier prints)
+    call setxy
+    ld a, 32            ; code for SPACE
+    rst 16              ; print
+    ; increment ypos
+    ld hl, ypos         ; load ypos addr
+    inc (hl)            ; increment ypos
+    ld a, (hl)          ; load ypos value into a
+    cp 33-eostr+string  ; compare to 32 (width of the screen - string length)
+    jr nz, loopy        ; not equal? loop
+    ; reached the end of the screen
+    ld (hl), 0          ; reset ypos
+    ; increment xpos
+    ld hl, xpos         ; load xpos addr
+    inc (hl)            ; increment xpos
+    ld a, (hl)          ; load xpo value into a
+    cp 22               ; compare to the chat height of the screen
+    jr nz, loopx
+
+; program complete
+    ret
+
+;
+; subroutines
+;
+
+;
+; short pause
+;
+shortpause:
+    ld b, 1             ; time to pause (1/10 sec)
+shortpauseloop:
+    halt                ; wait for interrupt
+    djnz shortpauseloop ; repeat if b not 0
+    ret
+
+;
+; long pause
+;
+longpause:
+    ld b, 100           ; time to pause (50 per second)
+longpauseloop:
+    halt                ; wait for interrupt
+    djnz longpauseloop  ; repeat if b not 0
+    ret
+
+;
+; print the string
+;
+printstr:
     ld de, string       ; address of string
     ld bc, eostr-string ; length of string to print
     call 8252           ; print the string
-
-; pause for 2 seconds
-    ld b, 100           ; time to pause (50 per second)
-delay:
-    halt                ; wait for an interrupt
-    djnz delay          ; repeat
-
     ret
+;
+; set the x and y position for text writing
+;
+setxy:
+    ld a, 22            ; control code for AT command
+    rst 16              ; 'print' AT command
+    ld a, (xpos)        ; load the x position
+    rst 16              ; print
+    ld a, (ypos)        ; load the y position
+    rst 16              ; print
+    ret                 ; position set, return
+
+;
+; data
+;
 
 string:
     defb "Hello world"  ; string to print
 eostr:
+
+xpos:
+  defb 0
+ypos:
+  defb 0
