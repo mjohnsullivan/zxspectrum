@@ -3,6 +3,7 @@
 *_out*
 *.o
 *.bin
+*.err
 
 # z88dk files
 zcc_opt.def
